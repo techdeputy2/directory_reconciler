@@ -17,7 +17,7 @@ The script will deal gracefully when either P1 or P2 email is missing for a give
 
 ### GCP credentials.json file
 
-You'll need a `credentials.json` file for running this. Go to the [Google Cloud Platform Console](https://console.cloud.google.com), login using admin credentials for vhsband.com, select 'ggbackup` as the project and then click on *Left Nav -> API & Services -> Credentials*
+You'll need a `credentials.json` file for running this. Go to the [Google Cloud Platform Console](https://console.cloud.google.com), login using admin credentials for vhsband.com, select `ggbackup` as the project and then click on *Left Nav -> API & Services -> Credentials*
 download the credential for `DirectoryUpdater` and save the file as `credentials.json`
 
 ## Running the script
@@ -26,7 +26,9 @@ Once you've pulled the source down, the first thing to do is setup a pipenv envi
 
 Execute the script using `python dirupdate.py <options>`
 valid `<options>` are:
-`-r or --report executes in reporting mode displaying differences`
-`-g or --generate executes in generator mode which prints CSV import content appropriate for bulk-importing missing entries into the corresponding google group`
+```
+-r or --report executes in reporting mode displaying differences
+-g or --generate executes in generator mode which prints CSV import content appropriate for bulk-importing missing entries into the corresponding google group
+```
 
 The first time you run this, it will print a URL to complete the OAuth2 authentication process. Paste this URL into a browser, login using your vhsband.com credentials, accept the permissions that the program is requesting and you'll get back a token. Copy this token and paste it back into the program run and the program will proceed as usual. Subsequent runs will use the saved 
