@@ -8,6 +8,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from directory import GroupMembers
 from sheets.CSVDirectory import CSVDirectory
+from resolver.MailResolver import MailResolver
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/admin.directory.group']
@@ -33,6 +34,9 @@ def args_parser():
     parser.add_argument('-r', '--report', help="Report mode, displays differences", action="store_true")
     parser.add_argument('-g', '--generate',
                         help="Generate mode, generates missing mailing list entries as an import CSV",
+                        action="store_true")
+    parser.add_argument('-v', '--validate',
+                        help="Validation mode, generates a list of invalid (based on MX domain) email addresses",
                         action="store_true")
     return parser
 
@@ -60,9 +64,10 @@ def build_google_api():
     return service
 
 
-def process_lists(report_mode):
+def process_lists(report_mode, generate_mode, validate_mode):
     service = build_google_api()
     csv = CSVDirectory('directory.csv')
+    mx_resolver = MailResolver()
 
     for index, mailing_list in enumerate(MAILING_LISTS):
         args = SHEET_OPTIONS[index]
@@ -77,12 +82,16 @@ def process_lists(report_mode):
             if report_mode:
                 print('In directory but not in mailing list:')
                 print(missing_mailing)
-            else:
+            elif generate_mode:
                 print('CSV for import as follows\n\n')
                 print('Group Email [Required],Member Email,Member Type,Member Role')
                 for m in missing_mailing:
                     print('{0},{1},USER,MEMBER'.format(mailing_list, m))
                 print('\n\n')
+            elif validate_mode:
+                for m in missing_mailing:
+                    if not mx_resolver.check_email(m):
+                        print('{0} does not appear to be from a valid email domain'.format(m))
         else:
             print('All directory entries are in the mailing list')
 
@@ -100,17 +109,17 @@ def main():
     parser = args_parser()
     args = parser.parse_args()
 
-    if args.report and args.generate:
-        print("Only one of --report or --generate is allowed")
+    if args.report and args.generate and args.validate:
+        print("Only one of report, generate or validate mode is allowed")
         parser.print_help()
         sys.exit()
 
-    if not args.report and not args.generate:
-        print("One of --report or --generate is required")
+    if not args.report and not args.generate and not args.validate:
+        print("Must choose a mode, report, validate, or generate")
         parser.print_help()
         sys.exit()
 
-    process_lists(args.report)
+    process_lists(args.report, args.generate, args.validate)
 
 
 if __name__ == '__main__':

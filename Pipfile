@@ -8,6 +8,9 @@ pylint = "*"
 autopep8 = "*"
 
 [packages]
+google-api-python-client = "*"
+google-auth-oauthlib = "*"
+dnspython = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3"
